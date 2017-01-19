@@ -4,14 +4,26 @@ import datetime
 
 
 def blackjack():
-	# give user and computer random cards calling card function
+	# initialize variables
 	userWinCount = 0
 	again = 'y'
+	# get user name
 	user = input("Enter your user name: ")
-	with open('Scores.txt', 'r') as doc:
-		content = doc.readlines()
-		doc.close()
-	if user in content:
+	# initialize content list for reading file
+	content = []
+	# exception handling for file reading
+	try:
+		with open('Scores.txt', 'r') as doc:
+			content = doc.readlines()
+			doc.close()
+	except FileNotFoundError:
+		print("It doesn't look like that file exists.")
+		exit(1)
+	except IOError:
+		print("Could not read file, " + str(doc))
+		exit(1)
+	# check to see if user already in scores list
+	if any(user in s for s in content):
 		print("Welcome back, " + user + "!")
 	else:
 		print("Nice to meet you, " + user)
@@ -62,12 +74,21 @@ def blackjack():
 			print("You win, " + user + "!")
 			userWinCount += 1
 			if userWins:
-				with open('Scores.txt', 'a+') as doc:
-					doc.write(user + ": " + str(userWinCount) + "\t" + str(datetime.date.today()) + "\n")
-					doc.close()
+				# exception handling for file write error
+				try:
+					with open('Scores.txt', 'a+') as doc:
+						doc.write(user + ": " + str(userWinCount) + "\t" + str(datetime.date.today()) + "\n")
+						doc.close()
+				except FileNotFoundError:
+					print("Oops, couldn't find that file!")
+					exit(1)
+				except IOError:
+					print("Something went wrong trying to save your score!")
+					exit(1)
 		else:
 			print("Computer wins!")
 		again = input("Do you want to play again? (y for yes): ")
+
 
 # define the card drawing function
 def card():
@@ -118,5 +139,4 @@ def get_user_hand(user, hand):
 def get_comp_hand(hand):
 		print("Computer hand: " + str(hand))
 
-# call main function
 blackjack()
